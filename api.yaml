@@ -1,0 +1,112 @@
+apiVersion: gateway.kusk.io/v1alpha1
+kind: API
+metadata:
+  name: hello-world
+spec: 
+  fleet:
+    name: kusk-gateway-envoy-fleet
+    namespace: kusk-system
+  spec: |
+    openapi: 3.0.0
+    info:
+      title: simple-api
+      version: 0.4.0
+    x-kusk:
+      cors:
+        origins:
+          - "*"
+        methods:
+          - GET
+    paths:
+      /hello:
+        x-kusk:
+          upstream:
+            service:
+              name: hello-svc
+              namespace: default
+              port: 8080
+            rewrite:
+              pattern: "^/hello"
+              substitution: "/"
+        get:
+          responses:
+            '200':
+              description: A simple hello world!
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: Hello from a mocked response!
+      /foo:
+        x-kusk:
+          upstream:
+            service:
+              name: foo-svc
+              namespace: default
+              port: 8080
+            rewrite:
+              pattern: "^/foo"
+              substitution: "/"
+        get:
+          responses:
+            '200':
+              description: A simple foo bar!
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: Bar from a mocked response!
+      /statuscode/{code}:
+        get:
+          x-kusk:
+            upstream:
+              host:
+                hostname: mocktarget.apigee.net
+                port: 80
+          parameters:
+          - name: "code"
+            in: "query"
+            description: "Desired response status code."
+            required: true
+            schema:
+              type: "string"
+      /users:
+        get:
+          x-kusk:
+            upstream:
+              host:
+                hostname: jsonplaceholder.typicode.com
+                port: 80
+          summary: "View personalized greeting"
+          operationId: "View personalized greeting"
+          description: "View a personalized greeting for the specified or guest user."
+          parameters:
+          - name: "user"
+            in: "query"
+            description: "Your user name."
+            required: false
+            schema:
+              type: "string"
+          responses:
+            "200":
+              description: "Success"
+      /users/{id}:
+        get:
+          x-kusk:
+            upstream:
+              host:
+                hostname: jsonplaceholder.typicode.com
+                port: 80
+          summary: "View personalized greeting"
+          operationId: "View personalized greeting"
+          description: "View a personalized greeting for the specified or guest user."
+          parameters:
+          - name: "id"
+            in: "query"
+            description: "user id"
+            required: true
+            schema:
+              type: "integer"
+          responses:
+            "200":
+              description: "Success"
